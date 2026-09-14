@@ -1,0 +1,28 @@
+# --- app/ (Expo/React Native) ---
+app/node_modules/
+app/.expo/
+app/dist/
+app/web-build/
+app/*.jks
+app/*.p8
+app/*.p12
+app/*.key
+app/*.mobileprovision
+app/.env
+app/.env.local
+
+# --- backend/ (Python/FastAPI) ---
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/.env
+backend/.pytest_cache/
+
+# --- editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.tmp
+.claude/settings.local.json
