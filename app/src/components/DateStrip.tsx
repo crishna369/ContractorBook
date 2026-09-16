@@ -22,6 +22,7 @@ export function DateStrip({ selectedDate, onSelect, daysBack = 13 }: DateStripPr
       horizontal
       showsHorizontalScrollIndicator={false}
       onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
+      style={styles.scroll}
       contentContainerStyle={styles.container}
     >
       {dates.map((date) => {
@@ -40,6 +41,10 @@ export function DateStrip({ selectedDate, onSelect, daysBack = 13 }: DateStripPr
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    flexGrow: 0,
+    flexShrink: 0,
+  },
   container: {
     gap: 8,
     paddingVertical: 4,
