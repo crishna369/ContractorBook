@@ -226,6 +226,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: spacing.screenPaddingHorizontal,
+    paddingTop: spacing.cardGap,
     paddingBottom: 40,
   },
   sectionHeader: {
