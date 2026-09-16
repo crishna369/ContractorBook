@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 import { colors } from '../../theme/colors';
 import { spacing, radius } from '../../theme/spacing';
 import { fontFamily, typography } from '../../theme/typography';
@@ -8,19 +10,27 @@ import { Avatar } from '../../components/Avatar';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { EmptyState } from '../../components/EmptyState';
 import { useCreateWorker, useWorkers } from '../../api/hooks/useWorkers';
+import { isValidMobileNumber, sanitizeMobileInput, sanitizeWholeNumberInput } from '../../utils/workerValidation';
 import type { Worker } from '../../types/api';
+import type { WorkersStackParamList } from '../../navigation/WorkersStack';
 
-function WorkerRow({ worker }: { worker: Worker }) {
+type NavProp = NativeStackNavigationProp<WorkersStackParamList, 'WorkerList'>;
+
+function WorkerRow({ worker, onPress }: { worker: Worker; onPress: () => void }) {
   return (
-    <Card style={styles.row}>
-      <Avatar name={worker.name} />
-      <View style={styles.rowInfo}>
-        <Text style={styles.rowName}>{worker.name}</Text>
-        <Text style={styles.rowMeta}>
-          {worker.mobile_number} · ₹{worker.daily_wage}/day
-        </Text>
-      </View>
-    </Card>
+    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+      <Card style={styles.row}>
+        <Avatar name={worker.name} />
+        <View style={styles.rowInfo}>
+          <Text style={styles.rowName}>{worker.name}</Text>
+          <Text style={styles.rowMeta}>
+            {worker.mobile_number ? `${worker.mobile_number} · ` : ''}₹{worker.daily_wage}/day
+          </Text>
+          {!worker.is_active && <Text style={styles.inactiveTag}>Inactive</Text>}
+        </View>
+        <Text style={styles.chevron}>›</Text>
+      </Card>
+    </TouchableOpacity>
   );
 }
 
@@ -30,13 +40,13 @@ function AddWorkerForm({ onDone }: { onDone: () => void }) {
   const [dailyWage, setDailyWage] = useState('');
   const createWorker = useCreateWorker();
 
-  const canSubmit = name.trim().length > 0 && mobileNumber.trim().length > 0 && Number(dailyWage) > 0;
+  const canSubmit = name.trim().length > 0 && isValidMobileNumber(mobileNumber) && Number(dailyWage) > 0;
 
   async function handleSubmit() {
     if (!canSubmit) return;
     await createWorker.mutateAsync({
       name: name.trim(),
-      mobile_number: mobileNumber.trim(),
+      mobile_number: mobileNumber.length > 0 ? mobileNumber : null,
       daily_wage: Number(dailyWage),
     });
     setName('');
@@ -51,19 +61,20 @@ function AddWorkerForm({ onDone }: { onDone: () => void }) {
       <TextInput style={styles.input} placeholder="Name" placeholderTextColor={colors.textMutedA} value={name} onChangeText={setName} />
       <TextInput
         style={styles.input}
-        placeholder="Mobile number"
+        placeholder="Mobile number (optional)"
         placeholderTextColor={colors.textMutedA}
-        keyboardType="phone-pad"
+        keyboardType="number-pad"
+        maxLength={10}
         value={mobileNumber}
-        onChangeText={setMobileNumber}
+        onChangeText={(text) => setMobileNumber(sanitizeMobileInput(text))}
       />
       <TextInput
         style={styles.input}
         placeholder="Daily wage"
         placeholderTextColor={colors.textMutedA}
-        keyboardType="numeric"
+        keyboardType="number-pad"
         value={dailyWage}
-        onChangeText={setDailyWage}
+        onChangeText={(text) => setDailyWage(sanitizeWholeNumberInput(text))}
       />
       <PrimaryButton label="Save worker" onPress={handleSubmit} loading={createWorker.isPending} disabled={!canSubmit} />
     </Card>
@@ -71,6 +82,7 @@ function AddWorkerForm({ onDone }: { onDone: () => void }) {
 }
 
 export function WorkerListScreen() {
+  const navigation = useNavigation<NavProp>();
   const { data: workers, isLoading, error } = useWorkers();
   const [showForm, setShowForm] = useState(false);
 
@@ -91,7 +103,9 @@ export function WorkerListScreen() {
       <FlatList
         data={workers}
         keyExtractor={(w) => w.id}
-        renderItem={({ item }) => <WorkerRow worker={item} />}
+        renderItem={({ item }) => (
+          <WorkerRow worker={item} onPress={() => navigation.navigate('WorkerDetail', { workerId: item.id })} />
+        )}
         ItemSeparatorComponent={() => <View style={{ height: spacing.cardGap }} />}
         ListEmptyComponent={!isLoading ? <EmptyState label="No workers yet" /> : null}
         contentContainerStyle={{ paddingBottom: 40 }}
@@ -140,6 +154,17 @@ const styles = StyleSheet.create({
     marginTop: 2,
     textTransform: 'none',
     letterSpacing: 0,
+  },
+  inactiveTag: {
+    ...typography.label,
+    color: colors.warningLight,
+    textTransform: 'none',
+    letterSpacing: 0,
+    marginTop: 2,
+  },
+  chevron: {
+    ...typography.headerLarge,
+    color: colors.textMutedB,
   },
   form: {
     gap: 10,

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../client';
-import type { Site, SiteCreateInput, SiteUpdateInput } from '../../types/api';
+import type { Site, SiteCreateInput, SiteReport, SiteUpdateInput } from '../../types/api';
 
 export function useSites() {
   return useQuery({
@@ -13,6 +13,18 @@ export function useSite(siteId: string) {
   return useQuery({
     queryKey: ['sites', siteId],
     queryFn: () => api.get<Site>(`/sites/${siteId}`),
+    enabled: !!siteId,
+  });
+}
+
+export function useSiteReport(siteId: string, dateFrom?: string | null, dateTo?: string | null) {
+  const params = new URLSearchParams();
+  if (dateFrom) params.set('date_from', dateFrom);
+  if (dateTo) params.set('date_to', dateTo);
+  const qs = params.toString();
+  return useQuery({
+    queryKey: ['sites', siteId, 'report', dateFrom ?? null, dateTo ?? null],
+    queryFn: () => api.get<SiteReport>(`/sites/${siteId}/report${qs ? `?${qs}` : ''}`),
   });
 }
 

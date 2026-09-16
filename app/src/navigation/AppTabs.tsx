@@ -1,15 +1,21 @@
 import React from 'react';
-import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { HomeScreen } from '../screens/home/HomeScreen';
-import { WorkerListScreen } from '../screens/workers/WorkerListScreen';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { HomeStack } from './HomeStack';
+import { AttendanceStack } from './AttendanceStack';
+import { WorkersStack } from './WorkersStack';
 import { SitesStack } from './SitesStack';
 import { colors } from '../theme/colors';
 import { fontFamily } from '../theme/typography';
 
-// TODO(phase 4): add an Attendance tab once AttendanceListScreen/MarkAttendanceSheet exist,
-// matching the 4-tab design (Home/Attendance/Workers/Sites).
-const Tab = createBottomTabNavigator();
+export type AppTabsParamList = {
+  Home: { screen?: string; params?: Record<string, unknown> } | undefined;
+  Attendance: undefined;
+  Workers: { screen?: string; params?: Record<string, unknown> } | undefined;
+  Sites: { screen?: string; params?: Record<string, unknown> } | undefined;
+};
+
+const Tab = createBottomTabNavigator<AppTabsParamList>();
 
 export function AppTabs() {
   return (
@@ -24,18 +30,55 @@ export function AppTabs() {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
-        options={{ tabBarLabel: 'Home', tabBarIcon: ({ color }) => <Text style={{ color }}>●</Text> }}
+        component={HomeStack}
+        options={{
+          tabBarLabel: 'Home',
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons name={focused ? 'home' : 'home-outline'} color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Attendance"
+        component={AttendanceStack}
+        options={{
+          tabBarLabel: 'Attendance',
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? 'calendar-check' : 'calendar-check-outline'}
+              color={color}
+              size={size}
+            />
+          ),
+        }}
       />
       <Tab.Screen
         name="Workers"
-        component={WorkerListScreen}
-        options={{ tabBarLabel: 'Workers', tabBarIcon: ({ color }) => <Text style={{ color }}>●</Text> }}
+        component={WorkersStack}
+        options={{
+          tabBarLabel: 'Workers',
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? 'account-hard-hat' : 'account-hard-hat-outline'}
+              color={color}
+              size={size}
+            />
+          ),
+        }}
       />
       <Tab.Screen
         name="Sites"
         component={SitesStack}
-        options={{ tabBarLabel: 'Sites', tabBarIcon: ({ color }) => <Text style={{ color }}>●</Text> }}
+        options={{
+          tabBarLabel: 'Sites',
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? 'office-building' : 'office-building-outline'}
+              color={color}
+              size={size}
+            />
+          ),
+        }}
       />
     </Tab.Navigator>
   );

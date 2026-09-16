@@ -1,12 +1,15 @@
 import uuid
+from datetime import date as date_type
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.crud import reports as reports_crud
 from app.crud import site as site_crud
 from app.auth import get_current_business
 from app.db import get_db
 from app.models.business import Business
+from app.schemas.reports import SiteReportOut
 from app.schemas.site import SiteCreate, SiteOut, SiteUpdate
 
 router = APIRouter(prefix="/sites", tags=["sites"])
@@ -44,6 +47,18 @@ async def get_site(
     db: AsyncSession = Depends(get_db),
 ):
     return await _get_site_or_404(db, business, site_id)
+
+
+@router.get("/{site_id}/report", response_model=SiteReportOut)
+async def get_site_report(
+    site_id: uuid.UUID,
+    date_from: date_type | None = None,
+    date_to: date_type | None = None,
+    business: Business = Depends(get_current_business),
+    db: AsyncSession = Depends(get_db),
+):
+    await _get_site_or_404(db, business, site_id)
+    return await reports_crud.get_site_report(db, business.id, site_id, date_from, date_to)
 
 
 @router.patch("/{site_id}", response_model=SiteOut)

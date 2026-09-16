@@ -45,16 +45,16 @@ export const typography = {
   amountLarge: {
     fontFamily: fontFamily.extraBold,
     fontSize: 27,
-    fontVariant: ['tabular-nums'] as const,
+    fontVariant: ['tabular-nums'] as Array<'tabular-nums'>,
   },
   amountXLarge: {
     fontFamily: fontFamily.extraBold,
     fontSize: 42,
-    fontVariant: ['tabular-nums'] as const,
+    fontVariant: ['tabular-nums'] as Array<'tabular-nums'>,
   },
   amount: {
     fontFamily: fontFamily.extraBold,
     fontSize: 16,
-    fontVariant: ['tabular-nums'] as const,
+    fontVariant: ['tabular-nums'] as Array<'tabular-nums'>,
   },
 } as const;

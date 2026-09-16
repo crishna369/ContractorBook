@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './src/api/queryClient';
 import { AuthProvider } from './src/auth/AuthContext';
 import { RootNavigator } from './src/navigation/RootNavigator';
+import { OfflineBanner } from './src/components/OfflineBanner';
 import { useAppFonts } from './src/theme/useAppFonts';
 import { colors } from './src/theme/colors';
 
@@ -22,6 +23,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <RootNavigator />
+        <OfflineBanner />
         <StatusBar style="dark" />
       </AuthProvider>
     </QueryClientProvider>

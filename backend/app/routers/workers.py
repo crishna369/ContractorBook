@@ -1,12 +1,17 @@
 import uuid
+from datetime import date as date_type
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.crud import payment as payment_crud
+from app.crud import reports as reports_crud
 from app.crud import worker as worker_crud
 from app.auth import get_current_business
 from app.db import get_db
 from app.models.business import Business
+from app.schemas.payment import WorkerBalanceOut
+from app.schemas.reports import WorkerReportOut
 from app.schemas.worker import WorkerCreate, WorkerOut, WorkerUpdate
 
 router = APIRouter(prefix="/workers", tags=["workers"])
@@ -44,6 +49,28 @@ async def get_worker(
     db: AsyncSession = Depends(get_db),
 ):
     return await _get_worker_or_404(db, business, worker_id)
+
+
+@router.get("/{worker_id}/balance", response_model=WorkerBalanceOut)
+async def get_worker_balance(
+    worker_id: uuid.UUID,
+    business: Business = Depends(get_current_business),
+    db: AsyncSession = Depends(get_db),
+):
+    await _get_worker_or_404(db, business, worker_id)
+    return await payment_crud.get_worker_balance(db, business.id, worker_id)
+
+
+@router.get("/{worker_id}/report", response_model=WorkerReportOut)
+async def get_worker_report(
+    worker_id: uuid.UUID,
+    date_from: date_type | None = None,
+    date_to: date_type | None = None,
+    business: Business = Depends(get_current_business),
+    db: AsyncSession = Depends(get_db),
+):
+    await _get_worker_or_404(db, business, worker_id)
+    return await reports_crud.get_worker_report(db, business.id, worker_id, date_from, date_to)
 
 
 @router.patch("/{worker_id}", response_model=WorkerOut)

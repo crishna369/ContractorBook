@@ -10,6 +10,9 @@ app/*.key
 app/*.mobileprovision
 app/.env
 app/.env.local
+# ad-hoc debug screenshots / uiautomator dumps left at the app root during emulator testing
+app/*.png
+app/*.xml
 
 # --- backend/ (Python/FastAPI) ---
 backend/.venv/
@@ -18,6 +21,9 @@ backend/**/__pycache__/
 backend/*.pyc
 backend/.env
 backend/.pytest_cache/
+# ad-hoc debug screenshots / uiautomator dumps left at the backend root during testing
+backend/*.png
+backend/*.xml
 
 # --- editors / OS ---
 .vscode/
